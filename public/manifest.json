@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Oko game",
+  "name": "Simple oko game",
   "icons": [
     {
       "src": "favicon.ico",

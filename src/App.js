@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
+import EndGame from "./components/endGame";
+import Menu from "./components/menu";
+import PlayerHand from "./components/playerHand";
 import "./App.css";
 
-const initialPlayerStats = {
+const initialPlayerState = {
   id: 1,
   cards: [],
   points: 0,
@@ -37,7 +40,7 @@ function App() {
   const [remainingPlayers, setRemainingPlayers] = useState(1);
   const [gameStatus, setGameStatus] = useState("initial");
   const [deckId, setDeckId] = useState("");
-  const [player, setPlayer] = useState({ ...initialPlayerStats });
+  const [player, setPlayer] = useState({ ...initialPlayerState });
   const [playerArr, setPlayerArr] = useState([]);
   const [winner, setWinner] = useState(0);
 
@@ -61,7 +64,7 @@ function App() {
   };
 
   const clearGame = () => {
-    setPlayer({ ...initialPlayerStats });
+    setPlayer({ ...initialPlayerState });
     setRemainingPlayers(playerNum);
     setPlayerArr([]);
     setWinner(0);
@@ -94,12 +97,11 @@ function App() {
     setRemainingPlayers(remainingPlayers - 1);
     setPlayerArr([...playerArr, player]);
     if (remainingPlayers >= 2) {
-      setPlayerArr([...playerArr, { ...player, playerLost: true }]);
-      setPlayer({ ...initialPlayerStats, id: player.id + 1 });
+      setPlayer({ ...initialPlayerState, id: player.id + 1 });
     }
   };
 
-  const endGame = useCallback(() => {
+  const updateGame = useCallback(() => {
     if (remainingPlayers === 0) {
       setGameStatus("ended");
       const filteredPlayerArr = playerArr.filter((e) => e.playerLost !== true);
@@ -115,75 +117,39 @@ function App() {
       }
     }
     if (player.points === 21 || (player.points === 22 && player.draws === 1)) {
-      setGameStatus("won");
+      setGameStatus("ended");
       setWinner(player.id);
     }
     if (remainingPlayers > 0 && player.points >= 22 && player.draws >= 2) {
       setRemainingPlayers(remainingPlayers - 1);
       if (remainingPlayers >= 2) {
         setPlayerArr([...playerArr, { ...player, playerLost: true }]);
-        setPlayer({ ...initialPlayerStats, id: player.id + 1 });
+        setPlayer({ ...initialPlayerState, id: player.id + 1 });
       }
     }
   }, [remainingPlayers, player, playerArr]);
 
   useEffect(() => {
-    endGame();
-  }, [endGame]);
+    updateGame();
+  }, [updateGame]);
 
   return (
     <div className="App">
-      {gameStatus !== "initial" ? (
-        <>
-          {gameStatus === "ended" ? (
-            <>
-              <p>Game over.</p>
-              {winner !== 0 ? <p>Player {winner} won.</p> : null}
-              <button onClick={startGame}>Start new game</button>
-              <button onClick={resetGame}>Main menu</button>
-            </>
-          ) : gameStatus === "won" ? (
-            <>
-              <p>Player {winner} won.</p>
-              <button onClick={startGame}>Start new game</button>
-              <button onClick={resetGame}>Main menu</button>
-            </>
-          ) : player.draws === 0 ? (
-            <button onClick={drawPair}>Draw pair</button>
-          ) : (
-            <>
-              <button onClick={drawCard}>Draw</button>
-              <button onClick={fold}>Fold</button>
-            </>
-          )}
-          <h2>Player {player.id}</h2>
-          <p>Points: {player.points}</p>
-          <p>Draws: {player.draws}</p>
-          <ul className="cardList">
-            {player.cards.map((e) => {
-              return (
-                <li key={e.code}>
-                  <img src={e.image} alt={`${e.suit} ${e.value}`} />
-                </li>
-              );
-            })}
-          </ul>
-        </>
+      {gameStatus === "initial" ? (
+        <Menu
+          startGame={startGame}
+          playerNum={playerNum}
+          setPlayerNum={setPlayerNum}
+        />
+      ) : gameStatus === "ended" ? (
+        <EndGame winner={winner} startGame={startGame} resetGame={resetGame} />
       ) : (
-        <>
-          <button onClick={startGame}>Start game</button>
-          <label>
-            Number of players: {playerNum}
-            <input
-              type="range"
-              min={1}
-              max={4}
-              step={1}
-              value={playerNum}
-              onChange={(event) => setPlayerNum(event.target.value)}
-            />
-          </label>
-        </>
+        <PlayerHand
+          player={player}
+          drawPair={drawPair}
+          drawCard={drawCard}
+          fold={fold}
+        />
       )}
     </div>
   );

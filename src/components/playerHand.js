@@ -21,15 +21,19 @@ const PlayerHand = ({ player, drawPair, drawCard, fold }) => {
         <DrawButton draw={drawCard} />
       )}
 
-      <ul className="cardList">
-        {player.cards.map((e) => {
-          return (
-            <li key={e.code}>
-              <img src={e.image} alt={`${e.suit} ${e.value}`} />
-            </li>
-          );
-        })}
-      </ul>
+      <section className="playerHand__cardListContainer">
+        {player.cards.length === 0 ? null : (
+          <ul className="playerHand__cardList">
+            {player.cards.map((e) => {
+              return (
+                <li key={e.code}>
+                  <img src={e.image} alt={`${e.suit} ${e.value}`} />
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
       <nav>
         <section className="playerHand__playerStats">
           <p>Points: {player.points}</p>

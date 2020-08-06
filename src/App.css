@@ -8,9 +8,14 @@
   justify-content: center;
 }
 
+img {
+  width: 100%;
+  height: auto;
+}
+
 .actionButton {
   background: #0078d7;
-  color: #FCFFFC;
+  color: #fcfffc;
   border: none;
   border-radius: 0.25rem;
   font-size: 1rem;
@@ -18,13 +23,25 @@
   text-align: center;
 }
 
+.actionButton:disabled,
+.actionButton:disabled:hover {
+  background: #cccccc;
+  color: initial;
+  cursor: not-allowed;
+}
+
+.actionButton:hover {
+  cursor: pointer;
+  background: #004680;
+}
+
 .menu {
   width: 100%;
   height: 100%;
   max-width: 320px;
   max-height: 320px;
-  background: #FCFFFC;
-  color: #040F0F;
+  background: #fcfffc;
+  color: #040f0f;
   border-radius: 0.5rem;
   padding: 1rem 0;
   display: flex;
@@ -56,15 +73,15 @@
 .playerHand h1 {
   font-size: 1.75rem;
   margin: 0;
-  color: #FCFFFC;
+  color: #fcfffc;
   text-align: center;
 }
 
 .playerHand nav {
   max-width: 320px;
   padding: 1rem;
-  background: #FCFFFC;
-  color: #040F0F;
+  background: #fcfffc;
+  color: #040f0f;
   border-radius: 0.5rem;
   text-align: center;
   bottom: 0;
@@ -72,24 +89,11 @@
 
 .playerHand figure {
   height: 50%;
+  width: 100%;
+  margin: 0;
   display: flex;
   align-content: center;
-}
-
-.cardList {
-  padding: 0;
-  height: 50%;
-  list-style: none;
-  display: flex;
-  align-items: center;
-}
-
-.cardList > *  {
-  max-width: 10vw;
-}
-
-.cardList > * > * {
-  max-height: 50vh;
+  justify-content: center;
 }
 
 .playerHand__drawCard {
@@ -103,6 +107,45 @@
   filter: invert(1) saturate(0);
 }
 
+.playerHand__cardListContainer {
+  display: flex;
+  justify-content: center;
+  height: 50%;
+  width: 100%;
+}
+
+.playerHand__cardList {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes slide {
+  from {
+    position: relative;
+    left: 100vw;
+  }
+  to {
+    position: relative;
+    left: 0;
+  }
+}
+
+.playerHand__cardList, li:last-of-type {
+  animation-name: slide;
+  animation-duration: 2s;
+  animation-timing-function: ease;
+}
+
+.playerHand__cardList > * {
+  position: absolute;
+}
+
 .playerHand__playerStats {
   display: flex;
   justify-content: center;
@@ -110,15 +153,4 @@
 .playerHand__playerStats p {
   font-size: 1rem;
   margin: 0 1rem 1rem;
-}
-
-.actionButton:disabled, .actionButton:disabled:hover {
-  background: #cccccc;
-  color: initial;
-  cursor: not-allowed;
-}
-
-.actionButton:hover {
-  cursor: pointer;
-  background: #004680;
 }

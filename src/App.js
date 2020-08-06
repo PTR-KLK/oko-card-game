@@ -39,9 +39,12 @@ function App() {
   const [playerNum, setPlayerNum] = useState(1);
   const [gameStatus, setGameStatus] = useState("initial");
   const [deckId, setDeckId] = useState("");
-  const [players, setPlayers] = useState([{ ...initialPlayerState },{ ...initialPlayerState }]);
+  const [players, setPlayers] = useState([
+    { ...initialPlayerState },
+    { ...initialPlayerState },
+  ]);
   const [currPlayerId, setCurrPlayerId] = useState(1);
-  const [winner, setWinner] = useState(0);
+  const [winner, setWinner] = useState([0]); // winner is an array because players can tie
 
   const startGame = () => {
     fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
@@ -86,7 +89,7 @@ function App() {
     }
     setPlayers([...newPlayers]);
     setCurrPlayerId(1);
-    setWinner(0);
+    setWinner([0]);
   };
 
   const resetGame = () => {
@@ -102,14 +105,26 @@ function App() {
     drawCards(1);
   };
 
-  const goToNextPlayer = useCallback((playerIdx) => {
-    if (playerIdx < players.length - 1) {
-      setCurrPlayerId(players[playerIdx + 1].id);
-    } else {
-      setCurrPlayerId(1); // reset current player id to prevent infinite loop
-      setGameStatus("ended");
-    }
-  },[players]);
+  const goToNextPlayer = useCallback(
+    (playerIdx) => {
+      if (playerIdx < players.length - 1) {
+        setCurrPlayerId(players[playerIdx + 1].id);
+      } else {
+        setCurrPlayerId(1); // reset current player id to prevent infinite loop
+
+        const mostPointsPlayer = players
+          .filter((e) => e.lost !== true)
+          .sort((a, b) => b.points - a.points)[0];
+        const winners = players
+          .filter((e) => e.points === mostPointsPlayer.points)
+          .map((e) => e.id);
+        console.log(mostPointsPlayer.id, winners);
+        setWinner(winners);
+        setGameStatus("ended");
+      }
+    },
+    [players]
+  );
 
   const fold = () => {
     const currPlayerIdx = players.findIndex((e) => e.id === currPlayerId);
@@ -129,7 +144,7 @@ function App() {
       (currPlayer.points === 22 && currPlayer.draws === 1)
     ) {
       setGameStatus("ended");
-      setWinner(currPlayerId);
+      setWinner([currPlayerId]);
     }
 
     // Singleplayer specific game logic - number of players is equal 1
@@ -145,7 +160,7 @@ function App() {
     if (playerNum > 1) {
       if (alivePlayers.length === 1) {
         setGameStatus("ended");
-        setWinner(currPlayerId);
+        setWinner([currPlayerId]);
       }
 
       if (currPlayer.points > 21 && currPlayer.draws > 1) {
@@ -157,7 +172,6 @@ function App() {
         setPlayers([...playersCopy]);
 
         goToNextPlayer(currPlayerIdx);
-      
       }
     }
   }, [players, currPlayerId, playerNum, goToNextPlayer]);

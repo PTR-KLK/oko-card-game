@@ -12,7 +12,7 @@ const Menu = ({ startGame, playerNum, setPlayerNum }) => {
           max={4}
           step={1}
           value={playerNum}
-          onChange={(event) => setPlayerNum(event.target.value)}
+          onChange={(event) => setPlayerNum(parseInt(event.target.value))}
         />
       </label>
     </>

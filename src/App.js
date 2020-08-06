@@ -9,7 +9,7 @@ const initialPlayerState = {
   cards: [],
   points: 0,
   draws: 0,
-  playerLost: false,
+  lost: false,
 };
 
 const changeValue = (obj) => {
@@ -37,12 +37,19 @@ const changeValue = (obj) => {
 
 function App() {
   const [playerNum, setPlayerNum] = useState(1);
-  const [remainingPlayers, setRemainingPlayers] = useState(1);
   const [gameStatus, setGameStatus] = useState("initial");
   const [deckId, setDeckId] = useState("");
-  const [player, setPlayer] = useState({ ...initialPlayerState });
-  const [playerArr, setPlayerArr] = useState([]);
+  const [players, setPlayers] = useState([{ ...initialPlayerState },{ ...initialPlayerState }]);
+  const [currPlayerId, setCurrPlayerId] = useState(1);
   const [winner, setWinner] = useState(0);
+
+  const startGame = () => {
+    fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
+      .then((response) => response.json())
+      .then((data) => setDeckId(data.deck_id));
+    clearGame();
+    setGameStatus("pending");
+  };
 
   const drawCards = (num) => {
     fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=${num}`)
@@ -55,27 +62,31 @@ function App() {
           .reduce((total, curr) => {
             return (total += curr);
           }, 0);
-        setPlayer({
-          ...player,
-          cards: [...player.cards, ...currDraw],
-          points: player.points + parseInt(currPoints),
-        });
+
+        const playersTemp = [...players];
+        const currPlayerIdx = playersTemp.findIndex(
+          (e) => e.id === currPlayerId
+        );
+
+        playersTemp[currPlayerIdx] = {
+          ...playersTemp[currPlayerIdx],
+          cards: [...playersTemp[currPlayerIdx].cards, ...currDraw],
+          points: playersTemp[currPlayerIdx].points + parseInt(currPoints),
+          draws: playersTemp[currPlayerIdx].draws + 1,
+        };
+
+        setPlayers([...playersTemp]);
       });
   };
 
   const clearGame = () => {
-    setPlayer({ ...initialPlayerState });
-    setRemainingPlayers(playerNum);
-    setPlayerArr([]);
+    const newPlayers = [];
+    for (let i = 1; i < playerNum + 1; i++) {
+      newPlayers.push({ ...initialPlayerState, id: i });
+    }
+    setPlayers([...newPlayers]);
+    setCurrPlayerId(1);
     setWinner(0);
-  };
-
-  const startGame = () => {
-    fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
-      .then((response) => response.json())
-      .then((data) => setDeckId(data.deck_id));
-    clearGame();
-    setGameStatus("pending");
   };
 
   const resetGame = () => {
@@ -85,49 +96,71 @@ function App() {
 
   const drawPair = () => {
     drawCards(2);
-    setPlayer({ ...player, draws: player.draws++ });
   };
 
   const drawCard = () => {
     drawCards(1);
-    setPlayer({ ...player, draws: player.draws++ });
   };
 
-  const fold = () => {
-    setRemainingPlayers(remainingPlayers - 1);
-    setPlayerArr([...playerArr, player]);
-    if (remainingPlayers >= 2) {
-      setPlayer({ ...initialPlayerState, id: player.id + 1 });
+  const goToNextPlayer = useCallback((playerIdx) => {
+    if (playerIdx < players.length - 1) {
+      setCurrPlayerId(players[playerIdx + 1].id);
+    } else {
+      setCurrPlayerId(1); // reset current player id to prevent infinite loop
+      setGameStatus("ended");
     }
+  },[players]);
+
+  const fold = () => {
+    const currPlayerIdx = players.findIndex((e) => e.id === currPlayerId);
+
+    // game logic part here, because you can end game with last plalyer folding game
+    goToNextPlayer(currPlayerIdx);
   };
 
   const updateGame = useCallback(() => {
-    if (remainingPlayers === 0) {
+    const playersCopy = [...players];
+    const alivePlayers = players.filter((e) => e.lost === false);
+    const currPlayer = players.find((e) => e.id === currPlayerId);
+    const currPlayerIdx = players.findIndex((e) => e.id === currPlayerId);
+
+    if (
+      currPlayer.points === 21 ||
+      (currPlayer.points === 22 && currPlayer.draws === 1)
+    ) {
       setGameStatus("ended");
-      const filteredPlayerArr = playerArr.filter((e) => e.playerLost !== true);
-      if (filteredPlayerArr.length === 1) {
-        setWinner(playerArr[0].id);
-      }
-      if (filteredPlayerArr.length > 1) {
-        setWinner(
-          filteredPlayerArr
-            .map((e) => ({ points: 21 - e.points, id: e.id }))
-            .sort((a, b) => a.points - b.points)[0].id
-        );
+      setWinner(currPlayerId);
+    }
+
+    // Singleplayer specific game logic - number of players is equal 1
+
+    if (playerNum === 1) {
+      if (currPlayer.points > 21 && currPlayer.draws > 1) {
+        setGameStatus("ended");
       }
     }
-    if (player.points === 21 || (player.points === 22 && player.draws === 1)) {
-      setGameStatus("ended");
-      setWinner(player.id);
-    }
-    if (remainingPlayers > 0 && player.points >= 22 && player.draws >= 2) {
-      setRemainingPlayers(remainingPlayers - 1);
-      if (remainingPlayers >= 2) {
-        setPlayerArr([...playerArr, { ...player, playerLost: true }]);
-        setPlayer({ ...initialPlayerState, id: player.id + 1 });
+
+    // Multiplayer specific game logic - number of players is greater than 1
+
+    if (playerNum > 1) {
+      if (alivePlayers.length === 1) {
+        setGameStatus("ended");
+        setWinner(currPlayerId);
+      }
+
+      if (currPlayer.points > 21 && currPlayer.draws > 1) {
+        playersCopy[currPlayerIdx] = {
+          ...playersCopy[currPlayerIdx],
+          lost: true,
+        };
+
+        setPlayers([...playersCopy]);
+
+        goToNextPlayer(currPlayerIdx);
+      
       }
     }
-  }, [remainingPlayers, player, playerArr]);
+  }, [players, currPlayerId, playerNum, goToNextPlayer]);
 
   useEffect(() => {
     updateGame();
@@ -145,7 +178,7 @@ function App() {
         <EndGame winner={winner} startGame={startGame} resetGame={resetGame} />
       ) : (
         <PlayerHand
-          player={player}
+          player={players.find((e) => e.id === currPlayerId)}
           drawPair={drawPair}
           drawCard={drawCard}
           fold={fold}

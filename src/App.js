@@ -36,13 +36,13 @@ const changeValue = (obj) => {
 };
 
 function App() {
-  const [playerNum, setPlayerNum] = useState(1);
-  const [gameStatus, setGameStatus] = useState("initial");
-  const [deckId, setDeckId] = useState("");
   const [players, setPlayers] = useState([
     { ...initialPlayerState },
     { ...initialPlayerState },
-  ]);
+  ]); // hotfix with player one winning game before start
+  const [playerNum, setPlayerNum] = useState(1);
+  const [gameStatus, setGameStatus] = useState("initial");
+  const [deckId, setDeckId] = useState("");
   const [currPlayerId, setCurrPlayerId] = useState(1);
   const [winner, setWinner] = useState([0]); // winner is an array because players can tie
 
@@ -94,6 +94,7 @@ function App() {
 
   const resetGame = () => {
     clearGame();
+    setPlayers([{ ...initialPlayerState }, { ...initialPlayerState }]); // hotfix with player one winning game before start
     setGameStatus("initial");
   };
 
@@ -181,7 +182,7 @@ function App() {
   }, [updateGame]);
 
   return (
-    <div className="App">
+    <main className="app">
       {gameStatus === "initial" ? (
         <Menu
           startGame={startGame}
@@ -198,7 +199,7 @@ function App() {
           fold={fold}
         />
       )}
-    </div>
+    </main>
   );
 }
 

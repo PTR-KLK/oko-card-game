@@ -2,16 +2,18 @@ import React from "react";
 
 const EndGame = ({ winner, startGame, resetGame }) => {
   return (
-    <>
-      <p>Game over.</p>
+    <section className="menu">
+      <h1>Game Over</h1>
       {winner[0] === 0 ? null : winner.length > 1 ? (
-        <p>Players {winner.join(", ")} tied.</p>
+        <h3>Players {winner.join(", ")} Tied</h3>
       ) : (
-        <p>Player {winner[0]} won.</p>
+        <h3>Player {winner[0]} Won</h3>
       )}
-      <button onClick={startGame}>Start new game</button>
-      <button onClick={resetGame}>Main menu</button>
-    </>
+      <nav>
+        <button className={"actionButton"} onClick={startGame}>New Game</button>
+        <button className={"actionButton"} onClick={resetGame}>Main Menu</button>
+      </nav>
+    </section>
   );
 };
 

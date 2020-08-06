@@ -1,10 +1,87 @@
-.App {
+.app {
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(#427e60, #2a513e);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionButton {
+  background: #0078d7;
+  color: #FCFFFC;
+  border: none;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  padding: 0.5rem;
   text-align: center;
 }
 
+.menu {
+  width: 100%;
+  height: 100%;
+  max-width: 320px;
+  max-height: 320px;
+  background: #FCFFFC;
+  color: #040F0F;
+  border-radius: 0.5rem;
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.menu h1 {
+  margin: 0;
+}
+
+.menu nav {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.playerHand {
+  margin: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.playerHand h1 {
+  font-size: 1.75rem;
+  margin: 0;
+  color: #FCFFFC;
+  text-align: center;
+}
+
+.playerHand nav {
+  max-width: 320px;
+  padding: 1rem;
+  background: #FCFFFC;
+  color: #040F0F;
+  border-radius: 0.5rem;
+  text-align: center;
+  bottom: 0;
+}
+
+.playerHand figure {
+  height: 50%;
+  display: flex;
+  align-content: center;
+}
+
 .cardList {
+  padding: 0;
+  height: 50%;
   list-style: none;
   display: flex;
+  align-items: center;
 }
 
 .cardList > *  {
@@ -13,4 +90,35 @@
 
 .cardList > * > * {
   max-height: 50vh;
+}
+
+.playerHand__drawCard {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.playerHand__drawCard:hover img {
+  filter: invert(1) saturate(0);
+}
+
+.playerHand__playerStats {
+  display: flex;
+  justify-content: center;
+}
+.playerHand__playerStats p {
+  font-size: 1rem;
+  margin: 0 1rem 1rem;
+}
+
+.actionButton:disabled, .actionButton:disabled:hover {
+  background: #cccccc;
+  color: initial;
+  cursor: not-allowed;
+}
+
+.actionButton:hover {
+  cursor: pointer;
+  background: #004680;
 }

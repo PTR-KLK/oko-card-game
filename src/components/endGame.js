@@ -2,7 +2,7 @@ import React from "react";
 
 const EndGame = ({ winner, startGame, resetGame }) => {
   return (
-    <section className="menu">
+    <section className="menu menu--end">
       <h1>Game Over</h1>
       {winner[0] === 0 ? null : winner.length > 1 ? (
         <h3>Players {winner.join(", ")} Tied</h3>

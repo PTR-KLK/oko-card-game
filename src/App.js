@@ -12,7 +12,7 @@ const initialPlayerState = {
   lost: false,
 };
 
-const changeValue = (obj) => {
+export const changeValue = (obj) => {
   let newObj = {};
 
   switch (obj.value) {
@@ -189,15 +189,22 @@ function App() {
           playerNum={playerNum}
           setPlayerNum={setPlayerNum}
         />
-      ) : gameStatus === "ended" ? (
-        <EndGame winner={winner} startGame={startGame} resetGame={resetGame} />
       ) : (
-        <PlayerHand
-          player={players.find((e) => e.id === currPlayerId)}
-          drawPair={drawPair}
-          drawCard={drawCard}
-          fold={fold}
-        />
+        <>
+          <PlayerHand
+            player={players.find((e) => e.id === currPlayerId)}
+            drawPair={drawPair}
+            drawCard={drawCard}
+            fold={fold}
+          />
+          {gameStatus === "ended" ? (
+            <EndGame
+              winner={winner}
+              startGame={startGame}
+              resetGame={resetGame}
+            />
+          ) : null}
+        </>
       )}
     </main>
   );

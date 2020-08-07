@@ -10,8 +10,12 @@ const EndGame = ({ winner, startGame, resetGame }) => {
         <h3>Player {winner[0]} Won</h3>
       )}
       <nav>
-        <button className={"actionButton"} onClick={startGame}>New Game</button>
-        <button className={"actionButton"} onClick={resetGame}>Main Menu</button>
+        <button className={"actionButton"} onClick={startGame}>
+          New Game
+        </button>
+        <button className={"actionButton"} onClick={resetGame}>
+          Main Menu
+        </button>
       </nav>
     </section>
   );

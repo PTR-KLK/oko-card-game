@@ -49,6 +49,7 @@ img {
   align-items: center;
   justify-content: space-between;
   text-align: center;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
 }
 
 @keyframes reveal {
@@ -64,7 +65,7 @@ img {
   opacity: 0;
   animation-name: reveal;
   position: absolute;
-  animation-delay: 1s;
+  animation-delay: 0.5s;
   animation-duration: 0;
   animation-timing-function: ease;
   animation-fill-mode: forwards;
@@ -126,6 +127,12 @@ img {
   filter: invert(1) saturate(0);
 }
 
+.actionButton:disabled,
+.playerHand__drawCard:disabled:hover img {
+  filter: none;
+  cursor: not-allowed;
+}
+
 .playerHand__cardListContainer {
   display: flex;
   justify-content: center;
@@ -147,7 +154,7 @@ img {
 @keyframes slide {
   from {
     position: relative;
-    left: 100vw;
+    left: 50vw;
   }
   to {
     position: relative;
@@ -155,7 +162,8 @@ img {
   }
 }
 
-.playerHand__cardList, li:last-of-type {
+.playerHand__cardList,
+li:last-of-type {
   animation-name: slide;
   animation-duration: 1s;
   animation-timing-function: ease;

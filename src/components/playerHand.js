@@ -1,24 +1,31 @@
 import React from "react";
 import backImage from "../back.png";
 
-const DrawButton = ({ draw }) => {
+const DrawButton = ({ draw, isDisabled }) => {
   return (
     <figure>
-      <button className="playerHand__drawCard" onClick={draw}>
+      <button
+        className="playerHand__drawCard"
+        onClick={draw}
+        disabled={isDisabled}
+      >
         <img src={backImage} alt="Card's back" />
       </button>
     </figure>
   );
 };
 
-const PlayerHand = ({ player, drawPair, drawCard, fold }) => {
+const PlayerHand = ({ player, drawCards, nextPlayer, gameStatus }) => {
   return (
     <section className="playerHand">
       <h1>Player {player.id}</h1>
       {player.draws === 0 ? (
-        <DrawButton draw={drawPair} />
+        <DrawButton draw={() => drawCards(2)} />
       ) : (
-        <DrawButton draw={drawCard} />
+        <DrawButton
+          draw={() => drawCards(1)}
+          isDisabled={gameStatus === "lose" || gameStatus === "win"}
+        />
       )}
 
       <section className="playerHand__cardListContainer">
@@ -41,8 +48,10 @@ const PlayerHand = ({ player, drawPair, drawCard, fold }) => {
         </section>
         <button
           className={"actionButton"}
-          onClick={fold}
-          disabled={player.draws === 0}
+          onClick={nextPlayer}
+          disabled={
+            gameStatus === "lose" || gameStatus === "win" || player.draws === 0
+          }
         >
           Fold
         </button>

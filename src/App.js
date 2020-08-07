@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
-import EndGame from "./components/endGame";
 import Menu from "./components/menu";
 import PlayerHand from "./components/playerHand";
+import PlayerLose from "./components/playerLose";
+import PlayerWin from "./components/playerWin";
 import "./App.css";
 
 const initialPlayerState = {
@@ -36,10 +37,7 @@ export const changeValue = (obj) => {
 };
 
 function App() {
-  const [players, setPlayers] = useState([
-    { ...initialPlayerState },
-    { ...initialPlayerState },
-  ]); // hotfix with player one winning game before start
+  const [players, setPlayers] = useState([]);
   const [playerNum, setPlayerNum] = useState(1);
   const [gameStatus, setGameStatus] = useState("initial");
   const [deckId, setDeckId] = useState("");
@@ -50,8 +48,24 @@ function App() {
     fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
       .then((response) => response.json())
       .then((data) => setDeckId(data.deck_id));
-    clearGame();
+
+    const newPlayers = [];
+    for (let i = 1; i < playerNum + 1; i++) {
+      newPlayers.push({ ...initialPlayerState, id: i });
+    }
+    setPlayers([...newPlayers]);
+    setCurrPlayerId(1);
+    setWinner([0]);
     setGameStatus("pending");
+  };
+
+  const resetGame = () => {
+    setPlayers([]);
+    setPlayerNum(1);
+    setGameStatus("initial");
+    setDeckId("");
+    setCurrPlayerId(1);
+    setWinner([0]);
   };
 
   const drawCards = (num) => {
@@ -71,111 +85,70 @@ function App() {
           (e) => e.id === currPlayerId
         );
 
-        playersTemp[currPlayerIdx] = {
-          ...playersTemp[currPlayerIdx],
+        updatePlayerStats({
           cards: [...playersTemp[currPlayerIdx].cards, ...currDraw],
           points: playersTemp[currPlayerIdx].points + parseInt(currPoints),
           draws: playersTemp[currPlayerIdx].draws + 1,
-        };
-
-        setPlayers([...playersTemp]);
+        });
       });
   };
 
-  const clearGame = () => {
-    const newPlayers = [];
-    for (let i = 1; i < playerNum + 1; i++) {
-      newPlayers.push({ ...initialPlayerState, id: i });
-    }
-    setPlayers([...newPlayers]);
-    setCurrPlayerId(1);
-    setWinner([0]);
-  };
+  const updatePlayerStats = useCallback(
+    (obj) => {
+      const playersTemp = [...players];
+      const currPlayerIdx = playersTemp.findIndex((e) => e.id === currPlayerId);
 
-  const resetGame = () => {
-    clearGame();
-    setPlayers([{ ...initialPlayerState }, { ...initialPlayerState }]); // hotfix with player one winning game before start
-    setGameStatus("initial");
-  };
+      playersTemp[currPlayerIdx] = {
+        ...playersTemp[currPlayerIdx],
+        ...obj,
+      };
 
-  const drawPair = () => {
-    drawCards(2);
-  };
-
-  const drawCard = () => {
-    drawCards(1);
-  };
-
-  const goToNextPlayer = useCallback(
-    (playerIdx) => {
-      if (playerIdx < players.length - 1) {
-        setCurrPlayerId(players[playerIdx + 1].id);
-      } else {
-        setCurrPlayerId(1); // reset current player id to prevent infinite loop
-
-        const mostPointsPlayer = players
-          .filter((e) => e.lost !== true)
-          .sort((a, b) => b.points - a.points)[0];
-        const winners = players
-          .filter((e) => e.points === mostPointsPlayer.points)
-          .map((e) => e.id);
-        console.log(mostPointsPlayer.id, winners);
-        setWinner(winners);
-        setGameStatus("ended");
-      }
+      setPlayers([...playersTemp]);
     },
-    [players]
+    [players, currPlayerId]
   );
 
-  const fold = () => {
-    const currPlayerIdx = players.findIndex((e) => e.id === currPlayerId);
-
-    // game logic part here, because you can end game with last plalyer folding game
-    goToNextPlayer(currPlayerIdx);
+  const nextPlayer = () => {
+    if (currPlayerId === players.length) {
+      setGameStatus("win");
+      const playerMaxPoints = players
+        .filter((e) => e.lost === false)
+        .sort((a, b) => b.points - a.points)[0];
+      setWinner(
+        players
+          .filter((e) => e.points === playerMaxPoints.points)
+          .map((e) => e.id)
+      );
+    } else if (
+      players.filter((e) => e.lost === false).length === 1 &&
+      playerNum > 1
+    ) {
+      setGameStatus("win");
+      setWinner([currPlayerId + 1]);
+    } else {
+      setGameStatus("pending");
+      setCurrPlayerId(currPlayerId + 1);
+    }
   };
 
   const updateGame = useCallback(() => {
-    const playersCopy = [...players];
-    const alivePlayers = players.filter((e) => e.lost === false);
     const currPlayer = players.find((e) => e.id === currPlayerId);
-    const currPlayerIdx = players.findIndex((e) => e.id === currPlayerId);
 
-    if (
-      currPlayer.points === 21 ||
-      (currPlayer.points === 22 && currPlayer.draws === 1)
-    ) {
-      setGameStatus("ended");
-      setWinner([currPlayerId]);
-    }
-
-    // Singleplayer specific game logic - number of players is equal 1
-
-    if (playerNum === 1) {
-      if (currPlayer.points > 21 && currPlayer.draws > 1) {
-        setGameStatus("ended");
-      }
-    }
-
-    // Multiplayer specific game logic - number of players is greater than 1
-
-    if (playerNum > 1) {
-      if (alivePlayers.length === 1) {
-        setGameStatus("ended");
+    if (players.length > 0) {
+      if (
+        currPlayer.points === 21 ||
+        (currPlayer.points === 22 && currPlayer.draws === 1)
+      ) {
+        setGameStatus("win");
         setWinner([currPlayerId]);
       }
 
-      if (currPlayer.points > 21 && currPlayer.draws > 1) {
-        playersCopy[currPlayerIdx] = {
-          ...playersCopy[currPlayerIdx],
-          lost: true,
-        };
-
-        setPlayers([...playersCopy]);
-
-        goToNextPlayer(currPlayerIdx);
+      if (!currPlayer.lost && currPlayer.points > 21 && currPlayer.draws > 1) {
+        setGameStatus("lose");
+        updatePlayerStats({ lost: true });
       }
     }
-  }, [players, currPlayerId, playerNum, goToNextPlayer]);
+  }, [players, currPlayerId, updatePlayerStats]);
 
   useEffect(() => {
     updateGame();
@@ -193,13 +166,22 @@ function App() {
         <>
           <PlayerHand
             player={players.find((e) => e.id === currPlayerId)}
-            drawPair={drawPair}
-            drawCard={drawCard}
-            fold={fold}
+            drawCards={drawCards}
+            nextPlayer={nextPlayer}
+            gameStatus={gameStatus}
           />
-          {gameStatus === "ended" ? (
-            <EndGame
+          {gameStatus === "win" ? (
+            <PlayerWin
               winner={winner}
+              startGame={startGame}
+              resetGame={resetGame}
+            />
+          ) : null}
+          {gameStatus === "lose" ? (
+            <PlayerLose
+              currPlayerId={currPlayerId}
+              nextPlayer={nextPlayer}
+              playerNum={playerNum}
               startGame={startGame}
               resetGame={resetGame}
             />

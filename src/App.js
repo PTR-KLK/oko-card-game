@@ -11,6 +11,7 @@ const initialPlayerState = {
   points: 0,
   draws: 0,
   lost: false,
+  bot: false,
 };
 
 export const changeValue = (obj) => {
@@ -38,7 +39,6 @@ export const changeValue = (obj) => {
 
 function App() {
   const [players, setPlayers] = useState([]);
-  // const [bot, setBot] = useState({...initialPlayerState});
   const [playerNum, setPlayerNum] = useState(1);
   const [gameStatus, setGameStatus] = useState("initial");
   const [deckId, setDeckId] = useState("");
@@ -54,6 +54,11 @@ function App() {
     for (let i = 1; i < playerNum + 1; i++) {
       newPlayers.push({ ...initialPlayerState, id: i });
     }
+
+    if (newPlayers.length === 1) {
+      newPlayers.push({ ...initialPlayerState, id: 2, bot: true });
+    }
+
     setPlayers([...newPlayers]);
     setCurrPlayer({ ...initialPlayerState });
     setWinner([0]);
@@ -69,21 +74,24 @@ function App() {
     setWinner([0]);
   };
 
-  const drawCards = (player, num) => {
-    fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=${num}`)
-      .then((response) => response.json())
-      .then((data) => {
-        const currDraw = data.cards;
-        const currPoints = currDraw
-          .map((e) => changeValue(e))
-          .map((e) => parseInt(e.value))
-          .reduce((total, curr) => {
-            return (total += curr);
-          }, 0);
+  const drawCards = useCallback(
+    (player, num) => {
+      fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=${num}`)
+        .then((response) => response.json())
+        .then((data) => {
+          const currDraw = data.cards;
+          const currPoints = currDraw
+            .map((e) => changeValue(e))
+            .map((e) => parseInt(e.value))
+            .reduce((total, curr) => {
+              return (total += curr);
+            }, 0);
 
-        updatePlayer(player, currDraw, currPoints);
-      });
-  };
+          updatePlayer(player, currDraw, currPoints);
+        });
+    },
+    [deckId]
+  );
 
   const updatePlayer = (player, draw, points) => {
     setCurrPlayer({
@@ -103,7 +111,7 @@ function App() {
     setPlayers([...arrTemp]);
   }, []);
 
-  const nextPlayer = () => {
+  const nextPlayer = useCallback(() => {
     if (currPlayer.id === players.length) {
       setGameStatus("win");
       const playerMaxPoints = players
@@ -114,26 +122,25 @@ function App() {
           .filter((e) => e.points === playerMaxPoints.points)
           .map((e) => e.id)
       );
-    } else if (
-      players.filter((e) => e.lost === false).length === 1 &&
-      playerNum > 1
-    ) {
+    } else if (players.filter((e) => e.lost === false).length === 1) {
       setGameStatus("win");
-      setWinner([currPlayer.id + 1]);
+      setWinner([players.find((e) => e.lost === false).id]);
     } else {
       setGameStatus("pending");
       setCurrPlayer(
         players[players.findIndex((e) => e.id === currPlayer.id) + 1]
       );
     }
-  };
+  }, [players, currPlayer.id]);
 
   const updateGame = useCallback(() => {
 
     if (players.length > 0) {
       if (
-        currPlayer.points === 21 ||
-        (currPlayer.points === 22 && currPlayer.draws === 1)
+        (currPlayer.id !== winner[0] && currPlayer.points === 21) ||
+        (currPlayer.id !== winner[0] &&
+          currPlayer.points === 22 &&
+          currPlayer.draws === 1)
       ) {
         setGameStatus("win");
         setWinner([currPlayer.id]);
@@ -153,11 +160,29 @@ function App() {
         updatePlayers(players, currPlayer);
       }
     }
-  }, [players, currPlayer, updatePlayers]);
+  }, [players, currPlayer, updatePlayers, winner]);
 
   useEffect(() => {
     updateGame();
-  }, [updateGame]);
+
+    if (currPlayer.bot === true) {
+      if (currPlayer.draws === 0) {
+        drawCards(currPlayer, 2);
+      }
+      if (
+        currPlayer.points !== 22 &&
+        currPlayer.points !== 21 &&
+        currPlayer.points < 20
+      ) {
+        const myVar = setTimeout(() => drawCards(currPlayer, 1), 1500);
+        return () => clearTimeout(myVar);
+      }
+
+      if (currPlayer.id !== winner[0] && currPlayer.points === 20) {
+        nextPlayer();
+      }
+    }
+  }, [updateGame, players, currPlayer, drawCards, winner, nextPlayer]);
 
   return (
     <main className="app">
@@ -171,7 +196,7 @@ function App() {
         <>
           <PlayerHand
             player={currPlayer}
-            drawCards={(num) => drawCards(currPlayer,num)}
+            drawCards={(num) => drawCards(currPlayer, num)}
             nextPlayer={nextPlayer}
             gameStatus={gameStatus}
           />

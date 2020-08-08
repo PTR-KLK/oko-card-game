@@ -24,7 +24,9 @@ const PlayerHand = ({ player, drawCards, nextPlayer, gameStatus }) => {
       ) : (
         <DrawButton
           draw={() => drawCards(1)}
-          isDisabled={gameStatus === "lose" || gameStatus === "win"}
+          isDisabled={
+            gameStatus === "lose" || gameStatus === "win" || player.bot
+          }
         />
       )}
 
@@ -50,7 +52,10 @@ const PlayerHand = ({ player, drawCards, nextPlayer, gameStatus }) => {
           className={"actionButton"}
           onClick={nextPlayer}
           disabled={
-            gameStatus === "lose" || gameStatus === "win" || player.draws === 0
+            gameStatus === "lose" ||
+            gameStatus === "win" ||
+            (player.id !== 0 && player.draws === 0) ||
+            player.bot
           }
         >
           Fold

@@ -4,7 +4,9 @@ const EndGame = ({ winner, startGame, resetGame }) => {
   return (
     <section className="menu menu--end">
       <h1>Game Over</h1>
-      {winner[0] === 0 ? null : winner.length > 1 ? (
+      {winner[0] === 0 ? (
+        <h3>Bot Player Won</h3>
+      ) : winner.length > 1 ? (
         <h3>Players {winner.join(", ")} Tied</h3>
       ) : (
         <h3>Player {winner[0]} Won</h3>

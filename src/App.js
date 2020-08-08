@@ -38,10 +38,11 @@ export const changeValue = (obj) => {
 
 function App() {
   const [players, setPlayers] = useState([]);
+  // const [bot, setBot] = useState({...initialPlayerState});
   const [playerNum, setPlayerNum] = useState(1);
   const [gameStatus, setGameStatus] = useState("initial");
   const [deckId, setDeckId] = useState("");
-  const [currPlayerId, setCurrPlayerId] = useState(1);
+  const [currPlayer, setCurrPlayer] = useState({ ...initialPlayerState });
   const [winner, setWinner] = useState([0]); // winner is an array because players can tie
 
   const startGame = () => {
@@ -54,7 +55,7 @@ function App() {
       newPlayers.push({ ...initialPlayerState, id: i });
     }
     setPlayers([...newPlayers]);
-    setCurrPlayerId(1);
+    setCurrPlayer({ ...initialPlayerState });
     setWinner([0]);
     setGameStatus("pending");
   };
@@ -64,11 +65,11 @@ function App() {
     setPlayerNum(1);
     setGameStatus("initial");
     setDeckId("");
-    setCurrPlayerId(1);
+    setCurrPlayer({ ...initialPlayerState });
     setWinner([0]);
   };
 
-  const drawCards = (num) => {
+  const drawCards = (player, num) => {
     fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=${num}`)
       .then((response) => response.json())
       .then((data) => {
@@ -80,36 +81,30 @@ function App() {
             return (total += curr);
           }, 0);
 
-        const playersTemp = [...players];
-        const currPlayerIdx = playersTemp.findIndex(
-          (e) => e.id === currPlayerId
-        );
-
-        updatePlayerStats({
-          cards: [...playersTemp[currPlayerIdx].cards, ...currDraw],
-          points: playersTemp[currPlayerIdx].points + parseInt(currPoints),
-          draws: playersTemp[currPlayerIdx].draws + 1,
-        });
+        updatePlayer(player, currDraw, currPoints);
       });
   };
 
-  const updatePlayerStats = useCallback(
-    (obj) => {
-      const playersTemp = [...players];
-      const currPlayerIdx = playersTemp.findIndex((e) => e.id === currPlayerId);
+  const updatePlayer = (player, draw, points) => {
+    setCurrPlayer({
+      ...player,
+      cards: [...player.cards, ...draw],
+      points: player.points + parseInt(points),
+      draws: player.draws + 1,
+    });
+  };
 
-      playersTemp[currPlayerIdx] = {
-        ...playersTemp[currPlayerIdx],
-        ...obj,
-      };
+  const updatePlayers = useCallback((arr, obj) => {
+    const arrTemp = [...arr];
+    const objIdx = arrTemp.findIndex((e) => e.id === obj.id);
 
-      setPlayers([...playersTemp]);
-    },
-    [players, currPlayerId]
-  );
+    arrTemp[objIdx] = { ...obj };
+
+    setPlayers([...arrTemp]);
+  }, []);
 
   const nextPlayer = () => {
-    if (currPlayerId === players.length) {
+    if (currPlayer.id === players.length) {
       setGameStatus("win");
       const playerMaxPoints = players
         .filter((e) => e.lost === false)
@@ -124,15 +119,16 @@ function App() {
       playerNum > 1
     ) {
       setGameStatus("win");
-      setWinner([currPlayerId + 1]);
+      setWinner([currPlayer.id + 1]);
     } else {
       setGameStatus("pending");
-      setCurrPlayerId(currPlayerId + 1);
+      setCurrPlayer(
+        players[players.findIndex((e) => e.id === currPlayer.id) + 1]
+      );
     }
   };
 
   const updateGame = useCallback(() => {
-    const currPlayer = players.find((e) => e.id === currPlayerId);
 
     if (players.length > 0) {
       if (
@@ -140,15 +136,24 @@ function App() {
         (currPlayer.points === 22 && currPlayer.draws === 1)
       ) {
         setGameStatus("win");
-        setWinner([currPlayerId]);
+        setWinner([currPlayer.id]);
       }
 
       if (!currPlayer.lost && currPlayer.points > 21 && currPlayer.draws > 1) {
         setGameStatus("lose");
-        updatePlayerStats({ lost: true });
+        setCurrPlayer({ ...currPlayer, lost: true });
+      }
+
+      const currPlayerIdx = players.findIndex((e) => e.id === currPlayer.id);
+
+      if (
+        currPlayer.points !== players[currPlayerIdx].points ||
+        currPlayer.lost !== players[currPlayerIdx].lost
+      ) {
+        updatePlayers(players, currPlayer);
       }
     }
-  }, [players, currPlayerId, updatePlayerStats]);
+  }, [players, currPlayer, updatePlayers]);
 
   useEffect(() => {
     updateGame();
@@ -165,8 +170,8 @@ function App() {
       ) : (
         <>
           <PlayerHand
-            player={players.find((e) => e.id === currPlayerId)}
-            drawCards={drawCards}
+            player={currPlayer}
+            drawCards={(num) => drawCards(currPlayer,num)}
             nextPlayer={nextPlayer}
             gameStatus={gameStatus}
           />
@@ -179,7 +184,7 @@ function App() {
           ) : null}
           {gameStatus === "lose" ? (
             <PlayerLose
-              currPlayerId={currPlayerId}
+              currPlayerId={currPlayer.id}
               nextPlayer={nextPlayer}
               playerNum={playerNum}
               startGame={startGame}

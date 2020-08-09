@@ -44,11 +44,20 @@ function App() {
   const [deckId, setDeckId] = useState("");
   const [currPlayer, setCurrPlayer] = useState({ ...initialPlayerState });
   const [winner, setWinner] = useState([0]); // winner is an array because players can tie
+  const [isError, setError] = useState(false);
 
   const startGame = () => {
     fetch("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
       .then((response) => response.json())
-      .then((data) => setDeckId(data.deck_id));
+      .then((data) => {
+        setError(false);
+        setDeckId(data.deck_id);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        setError(true);
+        setGameStatus("initial");
+      });
 
     const newPlayers = [];
     for (let i = 1; i < playerNum + 1; i++) {
@@ -88,6 +97,11 @@ function App() {
             }, 0);
 
           updatePlayer(player, currDraw, currPoints);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          setError(true);
+          resetGame();
         });
     },
     [deckId]
@@ -117,7 +131,8 @@ function App() {
       const playerMaxPoints = players
         .filter((e) => e.lost === false)
         .sort((a, b) => b.points - a.points)[0];
-      if (playerNum === 1) { // if bot and player have same amount of points - player wins
+      if (playerNum === 1) {
+        // if bot and player have same amount of points - player wins
         setWinner([playerMaxPoints.id]);
       } else {
         setWinner(
@@ -196,6 +211,7 @@ function App() {
           startGame={startGame}
           playerNum={playerNum}
           setPlayerNum={setPlayerNum}
+          isError={isError}
         />
       ) : (
         <>

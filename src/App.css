@@ -81,6 +81,10 @@ img {
   justify-content: space-evenly;
 }
 
+.menu__errorMessage {
+  color: red;
+}
+
 .playerHand {
   margin: 1rem;
   display: flex;

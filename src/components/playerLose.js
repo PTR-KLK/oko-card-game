@@ -2,10 +2,7 @@ import React from "react";
 
 const PlayerLose = ({
   currPlayerId,
-  nextPlayer,
-  playerNum,
-  startGame,
-  resetGame,
+  nextPlayer
 }) => {
   return (
     <section className="menu menu--end">

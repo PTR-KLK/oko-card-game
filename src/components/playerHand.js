@@ -18,7 +18,9 @@ const DrawButton = ({ draw, isDisabled }) => {
 const PlayerHand = ({ player, drawCards, nextPlayer, gameStatus }) => {
   return (
     <section className="playerHand">
-      <h1>Player {player.id}</h1>
+      <h1>
+        Player {player.id} {player.bot ? "(Bot)" : null}
+      </h1>
       {player.draws === 0 ? (
         <DrawButton draw={() => drawCards(2)} />
       ) : (

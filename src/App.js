@@ -117,11 +117,15 @@ function App() {
       const playerMaxPoints = players
         .filter((e) => e.lost === false)
         .sort((a, b) => b.points - a.points)[0];
-      setWinner(
-        players
-          .filter((e) => e.points === playerMaxPoints.points)
-          .map((e) => e.id)
-      );
+      if (playerNum === 1) { // if bot and player have same amount of points - player wins
+        setWinner([playerMaxPoints.id]);
+      } else {
+        setWinner(
+          players
+            .filter((e) => e.points === playerMaxPoints.points)
+            .map((e) => e.id)
+        );
+      }
     } else if (players.filter((e) => e.lost === false).length === 1) {
       setGameStatus("win");
       setWinner([players.find((e) => e.lost === false).id]);
@@ -131,10 +135,9 @@ function App() {
         players[players.findIndex((e) => e.id === currPlayer.id) + 1]
       );
     }
-  }, [players, currPlayer.id]);
+  }, [players, currPlayer.id, playerNum]);
 
   const updateGame = useCallback(() => {
-
     if (players.length > 0) {
       if (
         (currPlayer.id !== winner[0] && currPlayer.points === 21) ||
@@ -164,6 +167,8 @@ function App() {
 
   useEffect(() => {
     updateGame();
+
+    // bot logic
 
     if (currPlayer.bot === true) {
       if (currPlayer.draws === 0) {

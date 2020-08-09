@@ -117,14 +117,15 @@ img {
 }
 
 .playerHand__drawCard {
+  margin: auto 0;
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
 }
 
-.playerHand__drawCard:hover img {
-  filter: invert(1) saturate(0);
+.playerHand__drawCard:hover {
+  outline: 5px solid #f4b942;
 }
 
 .actionButton:disabled,

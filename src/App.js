@@ -126,7 +126,7 @@ function App() {
   }, []);
 
   const nextPlayer = useCallback(() => {
-    if ((winner[0] === 0 && currPlayer.id === players.length)) {
+    if (winner[0] === 0 && currPlayer.id === players.length) {
       setGameStatus("win");
       const playerMaxPoints = players
         .filter((e) => e.lost === false)
@@ -179,25 +179,25 @@ function App() {
     updateGame();
 
     // bot logic
-    if(players.length > 0){
-    if (currPlayer.bot === true) {
-      if (currPlayer.draws === 0) {
-        drawCards(currPlayer, 2);
-      }
-      if (
-        currPlayer.points !== 22 &&
-        currPlayer.points !== 21 &&
-        currPlayer.points < 20
-      ) {
-        const myVar = setTimeout(() => drawCards(currPlayer, 1), 1500);
-        return () => clearTimeout(myVar);
-      }
+    if (players.length > 0) {
+      if (currPlayer.bot === true) {
+        if (currPlayer.draws === 0) {
+          drawCards(currPlayer, 2);
+        }
+        if (
+          currPlayer.points !== 22 &&
+          currPlayer.points !== 21 &&
+          currPlayer.points < 20
+        ) {
+          const myVar = setTimeout(() => drawCards(currPlayer, 1), 1500);
+          return () => clearTimeout(myVar);
+        }
 
-      
         if (winner[0] === 0 && currPlayer.points === 20) {
           nextPlayer();
         }
-      }}
+      }
+    }
   }, [updateGame, players, currPlayer, drawCards, winner, nextPlayer]);
 
   return (

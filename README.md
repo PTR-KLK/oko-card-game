@@ -1,10 +1,6 @@
 <h1 align=center>Oko Card Game</h1>
 
----
-
 <p align=center>Blackjack-like game. Created with <a href="####React">React</a> and <a href="####Deck of Card API">Deck of Card API</a>.</p>
-
----
 
 <div align="center">
 <img src="/images/screenshot1.png" width="45%"></img> <img src="/images/screenshot2.png" width="45%"></img> <img src="/images/screenshot3.png" width="45%"></img> <img src="/images/screenshot4.png" width="45%"></img>

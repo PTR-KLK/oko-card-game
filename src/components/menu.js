@@ -1,10 +1,15 @@
 import React from "react";
 import "../App.css";
 
-const Menu = ({ startGame, playerNum, setPlayerNum }) => {
+const Menu = ({ startGame, playerNum, setPlayerNum, isError }) => {
   return (
     <section className="menu">
       <h1>Oko Card Game</h1>
+      {isError ? (
+        <p className="menu__errorMessage">
+          Error with fetching data. <br /> Try again later.
+        </p>
+      ) : null}
       <label>Number of players: {playerNum}</label>
       <input
         type="range"

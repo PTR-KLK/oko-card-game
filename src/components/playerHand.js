@@ -56,7 +56,7 @@ const PlayerHand = ({ player, drawCards, nextPlayer, gameStatus }) => {
           disabled={
             gameStatus === "lose" ||
             gameStatus === "win" ||
-            (player.id !== 0 && player.draws === 0) ||
+            player.draws === 0 ||
             player.bot
           }
         >

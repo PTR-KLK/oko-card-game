@@ -126,21 +126,16 @@ function App() {
   }, []);
 
   const nextPlayer = useCallback(() => {
-    if (currPlayer.id === players.length) {
+    if ((winner[0] === 0 && currPlayer.id === players.length)) {
       setGameStatus("win");
       const playerMaxPoints = players
         .filter((e) => e.lost === false)
         .sort((a, b) => b.points - a.points)[0];
-      if (playerNum === 1) {
-        // if bot and player have same amount of points - player wins
-        setWinner([playerMaxPoints.id]);
-      } else {
-        setWinner(
-          players
-            .filter((e) => e.points === playerMaxPoints.points)
-            .map((e) => e.id)
-        );
-      }
+      setWinner(
+        players
+          .filter((e) => e.points === playerMaxPoints.points)
+          .map((e) => e.id)
+      );
     } else if (players.filter((e) => e.lost === false).length === 1) {
       setGameStatus("win");
       setWinner([players.find((e) => e.lost === false).id]);
@@ -150,7 +145,7 @@ function App() {
         players[players.findIndex((e) => e.id === currPlayer.id) + 1]
       );
     }
-  }, [players, currPlayer.id, playerNum]);
+  }, [players, currPlayer.id, winner]);
 
   const updateGame = useCallback(() => {
     if (players.length > 0) {
@@ -184,7 +179,7 @@ function App() {
     updateGame();
 
     // bot logic
-
+    if(players.length > 0){
     if (currPlayer.bot === true) {
       if (currPlayer.draws === 0) {
         drawCards(currPlayer, 2);
@@ -198,10 +193,11 @@ function App() {
         return () => clearTimeout(myVar);
       }
 
-      if (currPlayer.id !== winner[0] && currPlayer.points === 20) {
-        nextPlayer();
-      }
-    }
+      
+        if (winner[0] === 0 && currPlayer.points === 20) {
+          nextPlayer();
+        }
+      }}
   }, [updateGame, players, currPlayer, drawCards, winner, nextPlayer]);
 
   return (

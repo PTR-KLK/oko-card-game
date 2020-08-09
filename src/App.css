@@ -1,3 +1,11 @@
+:root {
+  --box-shadow-1: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  --box-shadow-2: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  --box-shadow-3: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  --main-color-light: #fcfffc;
+  --main-color-dark: #040f0f;
+}
+
 .app {
   height: 100vh;
   width: 100vw;
@@ -15,7 +23,7 @@ img {
 
 .actionButton {
   background: #0078d7;
-  color: #fcfffc;
+  color: var(--main-color-light);
   border: none;
   border-radius: 0.25rem;
   font-size: 1rem;
@@ -40,8 +48,8 @@ img {
   height: 100%;
   max-width: 320px;
   max-height: 320px;
-  background: #fcfffc;
-  color: #040f0f;
+  background: var(--main-color-light);
+  color: var(--main-color-dark);
   border-radius: 0.5rem;
   padding: 1rem 0;
   display: flex;
@@ -49,7 +57,7 @@ img {
   align-items: center;
   justify-content: space-between;
   text-align: center;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  box-shadow: var(--box-shadow-1);
 }
 
 @keyframes reveal {
@@ -97,15 +105,15 @@ img {
 .playerHand h1 {
   font-size: 1.75rem;
   margin: 0;
-  color: #fcfffc;
+  color: var(--main-color-light);
   text-align: center;
 }
 
 .playerHand nav {
   max-width: 320px;
   padding: 1rem;
-  background: #fcfffc;
-  color: #040f0f;
+  background: var(--main-color-light);
+  color: var(--main-color-dark);
   border-radius: 0.5rem;
   text-align: center;
   bottom: 0;
@@ -120,16 +128,44 @@ img {
   justify-content: center;
 }
 
+@keyframes slideRight {
+  from {
+    position: relative;
+    left: 0;
+    box-shadow: var(--box-shadow-1);
+  }
+  to {
+    position: relative;
+    left: 10%;
+    box-shadow: var(--box-shadow-2);
+  }
+}
+
 .playerHand__drawCard {
+  height: 100%;
+  max-height: 314px;
+  width: auto;
   margin: auto 0;
-  background: none;
+  background: url(./back.png);
+  background-repeat: no-repeat;
   border: none;
   padding: 0;
   cursor: pointer;
+  box-shadow: var(--box-shadow-3);
+  border-radius: 1rem;
 }
 
-.playerHand__drawCard:hover {
-  outline: 5px solid #f4b942;
+.playerHand__drawCard img {
+  box-shadow: var(--box-shadow-1);
+  border-radius: 1rem;
+  z-index: 2;
+}
+
+.playerHand__drawCard:hover img {
+  animation-name: slideRight;
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
 }
 
 .actionButton:disabled,
@@ -156,10 +192,10 @@ img {
   justify-content: center;
 }
 
-@keyframes slide {
+@keyframes slideLeftUl {
   from {
     position: relative;
-    left: 50vw;
+    left: 50%;
   }
   to {
     position: relative;
@@ -167,15 +203,37 @@ img {
   }
 }
 
-.playerHand__cardList,
-li:last-of-type {
-  animation-name: slide;
+@keyframes slideLeftLi {
+  from {
+    position: relative;
+    left: 50%;
+  }
+  to {
+    position: relative;
+    left: 5%;
+  }
+}
+
+.playerHand__cardList{
+  animation-name: slideLeftUl;
   animation-duration: 1s;
   animation-timing-function: ease;
 }
 
+li:last-of-type {
+  animation-name: slideLeftLi;
+  animation-duration: 1s;
+  animation-timing-function: ease;
+  animation-fill-mode: forwards;
+}
+
 .playerHand__cardList > * {
   position: absolute;
+}
+
+.playerHand__cardList img {
+  box-shadow: var(--box-shadow-1);
+  border-radius: 1rem;
 }
 
 .playerHand__playerStats {

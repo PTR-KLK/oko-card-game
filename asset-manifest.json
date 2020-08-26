@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/oko-card-game/static/css/main.7af74738.chunk.css",
+    "main.js": "/oko-card-game/static/js/main.b2e9fd5f.chunk.js",
+    "main.js.map": "/oko-card-game/static/js/main.b2e9fd5f.chunk.js.map",
+    "runtime-main.js": "/oko-card-game/static/js/runtime-main.4f8579e1.js",
+    "runtime-main.js.map": "/oko-card-game/static/js/runtime-main.4f8579e1.js.map",
+    "static/js/2.2284ca31.chunk.js": "/oko-card-game/static/js/2.2284ca31.chunk.js",
+    "static/js/2.2284ca31.chunk.js.map": "/oko-card-game/static/js/2.2284ca31.chunk.js.map",
+    "index.html": "/oko-card-game/index.html",
+    "precache-manifest.27a0f786a82f0e7163b96c727d9548b2.js": "/oko-card-game/precache-manifest.27a0f786a82f0e7163b96c727d9548b2.js",
+    "service-worker.js": "/oko-card-game/service-worker.js",
+    "static/css/main.7af74738.chunk.css.map": "/oko-card-game/static/css/main.7af74738.chunk.css.map",
+    "static/js/2.2284ca31.chunk.js.LICENSE.txt": "/oko-card-game/static/js/2.2284ca31.chunk.js.LICENSE.txt",
+    "static/media/back.png": "/oko-card-game/static/media/back.8c15b137.png"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.4f8579e1.js",
+    "static/js/2.2284ca31.chunk.js",
+    "static/css/main.7af74738.chunk.css",
+    "static/js/main.b2e9fd5f.chunk.js"
+  ]
+}
